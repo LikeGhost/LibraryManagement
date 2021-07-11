@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jmu.yaw.library.mapper.BookInformationMapper">
+    <select id="queryAllBookInformation" resultType="java.util.Map">
+        select isbn,bookinformation.clcId,btId,quantity,bookName,author,publishArea, publishHouse,publishTime,wordCount,price,biIntroduction,chineselibraryclassification.clcContent
+        from bookinformation,chineselibraryclassification
+        where bookinformation.clcId=chineselibraryclassification.clcId;
+    </select>
+    <resultMap id="queryAllBookMap" type="jmu.yaw.library.po.BookInformation">
+        <id property="isbn" column="isbn"/>
+        <result property="clcId" column="clcId"/>
+        <result property="btId" column="btId"/>
+        <result property="bookName" column="bookName"/>
+        <result property="author" column="author"/>
+        <result property="publishArea" column="publishArea"/>
+        <result property="publishTime" column="publishTime"/>
+        <result property="wordCount" column="wordCount"/>
+        <result property="price" column="price"/>
+        <result property="biIntroduction" column="biIntroduction"/>
+        <collection property="books" javaType="list" ofType="jmu.yaw.library.po.Book">
+            <id property="bId" column="bId"/>
+            <result property="isbn" column="isbn"/>
+            <result property="lId" column="lId"/>
+            <result property="bPutTime" column="bPutTime"/>
+            <result property="bOutTime" column="bOutTime"/>
+            <result property="borrowStatus" column="borrowStatus"/>
+            <association property="library" javaType="jmu.yaw.library.po.Library">
+                <result property="lId" column="lId"/>
+                <result property="lName" column="lName"/>
+                <result property="lLocation" column="lLocation"/>
+                <result property="lIntroduction" column="lIntroduction"/>
+            </association>
+            <association property="borrowType" javaType="jmu.yaw.library.po.BorrowType">
+                <result property="btId" column="btId"/>
+                <result property="btContent" column="btContent"/>
+                <result property="btFine" column="btFine"/>
+            </association>
+        </collection>
+    </resultMap>
+    <select id="queryAllBookByISBN" parameterType="jmu.yaw.library.po.BookInformation" resultMap="queryAllBookMap">
+select bookinformation.isbn,CLCId, bookinformation.btId, quantity, bookName, author, publishArea, publishHouse,publishTime, wordCount, price, biIntroduction,
+bid, bookinformation.btId, bPutTime, bOutTime, borrowStatus,
+library.lId, lName, lLocation, lIntroduction,
+btContent,btFine
+from bookinformation,book,library,borrowtype
+where book.isbn=#{isbn} and book.isbn=bookinformation.isbn and book.lid=library.lid and bookinformation.btId=borrowtype.btId order by bid
+    </select>
+
+    <update id="subBookInformationQuantity" parameterType="jmu.yaw.library.po.BookInformation">
+       update bookinformation set quantity=quantity-1 where isbn=#{isbn};
+   </update>
+    <insert id="insertBookInformation" parameterType="jmu.yaw.library.po.BookInformation">
+insert into bookinformation(ISBN, CLCId, btId, quantity, bookName, author, publishArea, publishHouse, publishTime, wordCount, price, biIntroduction,biPutTime,realBtId)
+values (#{isbn}, #{clcId}, 3, #{quantity}, #{bookName}, #{author}, #{publishArea}, #{publishHouse}, #{publishTime}, #{wordCount},#{price}, #{biIntroduction},curdate(),#{btId});
+    </insert>
+    <select id="queryBookInformationByISBN" parameterType="jmu.yaw.library.po.BookInformation" resultType="jmu.yaw.library.po.BookInformation">
+        select isbn, clcId, btId, quantity, bookName, author, publishArea, publishHouse, publishTime, wordCount, price, biIntroduction from bookinformation where ISBN=#{isbn};
+    </select>
+    <delete id="deleteBookInformationByISBN" parameterType="jmu.yaw.library.po.BookInformation">
+        delete from bookinformation where isbn=#{isbn};
+    </delete>
+    <update id="updateQuantity" >
+    update bookinformation set quantity=quantity+#{count} where isbn=#{isbn};
+    </update>
+
+    <update id="refreshAllBtId" >
+        update bookinformation
+        set btId= realBtId
+        where DATEDIFF(curdate(),biPutTime)>60 and isbn>"0";
+    </update>
+</mapper>

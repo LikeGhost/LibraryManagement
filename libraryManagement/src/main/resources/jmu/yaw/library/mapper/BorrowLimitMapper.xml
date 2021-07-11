@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jmu.yaw.library.mapper.BorrowLimitMapper">
+
+    <select id="queryBorrowLimit" parameterType="jmu.yaw.library.po.BorrowRecord" resultType="jmu.yaw.library.po.BorrowLimit">
+select x.btId, x.rId, borrowNum, borrowDay, canBorrow, canBorrowDay
+from borrowlimit,(select user.rId,bookinformation.btId from user,book,bookinformation where user.uId=#{uId} and book.bId=#{bId} and bookinformation.isbn=book.isbn) x
+where borrowlimit.rId=x.rId and borrowlimit.btId=x.btId;
+    </select>
+</mapper>

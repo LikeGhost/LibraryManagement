@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jmu.yaw.library.mapper.BookMapper">
+
+    <update id="updateBorrowStatus" parameterType="jmu.yaw.library.po.Book">
+        update book set borrowStatus=#{borrowStatus} where bId=#{bId};
+    </update>
+
+    <select id="queryBookByBId" resultType="jmu.yaw.library.po.Book" parameterType="jmu.yaw.library.po.Book">
+        select bId, ISBN, lId, bPutTime, bOutTime, borrowStatus from book where bId=#{bId};
+    </select>
+
+    <select id="queryBookByISBN" parameterType="jmu.yaw.library.po.Book" resultType="jmu.yaw.library.po.Book">
+        select bId, ISBN, lId,  bPutTime, bOutTime, borrowStatus from book where isbn=#{isbn};
+    </select>
+
+    <insert id="insertBook" parameterType="jmu.yaw.library.po.Book">
+        insert into book(isbn,lId,bPutTime,bOutTime,borrowStatus)values (#{isbn},#{lId},#{bPutTime},#{bOutTime},#{borrowStatus});
+    </insert>
+    <delete id="deleteBook" parameterType="jmu.yaw.library.po.Book">
+        delete from book where bId=#{bId};
+    </delete>
+</mapper>

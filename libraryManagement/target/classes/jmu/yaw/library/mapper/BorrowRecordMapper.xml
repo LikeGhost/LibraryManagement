@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jmu.yaw.library.mapper.BorrowRecordMapper">
+
+
+    <insert id="insertBorrowRecord" parameterType="jmu.yaw.library.po.BorrowRecord">
+        insert into borrowrecord(uId,bId,borrowTime,returnTime,finePrice,recordStatus)values(#{uId},#{bId},#{borrowTime},#{returnTime},#{finePrice},#{recordStatus});
+    </insert>
+    <resultMap id="queryBorrowRecordByUIdMap" type="jmu.yaw.library.po.BorrowRecord">
+        <id property="brId" column="brId"/>
+        <result property="uId" column="uId"/>
+        <result property="bId" column="bId"/>
+        <result property="borrowTime" column="borrowTime"/>
+        <result property="returnTime" column="returnTime"/>
+        <result property="finePrice" column="finePrice"/>
+        <result property="recordStatus" column="recordStatus"/>
+        <association property="book" javaType="jmu.yaw.library.po.Book">
+            <association property="library" javaType="jmu.yaw.library.po.Library">
+                <id property="lId" column="lId"/>
+                <result property="lName" column="lName"/>
+            </association>
+            <association property="bookInformation" javaType="jmu.yaw.library.po.BookInformation">
+                <id property="isbn" column="isbn"/>
+                <result property="bookName" column="bookName"/>
+            </association>
+        </association>
+    </resultMap>
+    <select id="queryBorrowRecordByUId" parameterType="jmu.yaw.library.po.User" resultMap="queryBorrowRecordByUIdMap">
+        select borrowrecord.brId,borrowrecord.uId, borrowrecord.bId, borrowTime, returnTime, finePrice,
+        recordStatus,bookinformation.bookName,book.lId,library.lName,book.isbn
+        from borrowrecord,book,bookinformation,library
+        where
+        <if test="uId!=null">
+            uId=#{uId} and
+        </if>
+        borrowrecord.bId=book.bId and book.isbn=bookinformation.isbn and library.lId=book.lId;
+    </select>
+
+    <update id="updateRecordStatus" parameterType="jmu.yaw.library.po.BorrowRecord">
+        update borrowrecord set recordStatus=#{recordStatus} where uId=#{uId} and bId=#{bId}
+        <if test='recordStatus=="running"'>
+            and recordStatus='stop';
+        </if>
+        <if test='recordStatus=="stop"'>
+            and recordStatus='running';
+        </if>
+
+    </update>
+    <select id="queryBorrowRecordByBrId" parameterType="jmu.yaw.library.po.BorrowRecord"
+            resultType="jmu.yaw.library.po.BorrowRecord">
+        select brId, uId, bId, borrowTime, returnTime, finePrice, recordStatus from borrowrecord where brId=#{brId};
+    </select>
+
+    <update id="updateReturnTimeAndRecordStatusByBrId" parameterType="jmu.yaw.library.po.BorrowRecord">
+        update borrowrecord set returntime=#{returnTime},recordStatus=#{recordStatus} where brId=#{brId};
+    </update>
+
+    <update id="refreshAllRecordStatusAndFinePrice">
+call library.refreshAllRecordStatusAndFinePrice();
+    </update>
+    <update id="subFinePrice" parameterType="jmu.yaw.library.po.BorrowRecord">
+        update borrowrecord set fineprice=fineprice-#{finePrice} where brId=#{brId};
+    </update>
+
+    <update id="updateRecordStatusByBrId" parameterType="jmu.yaw.library.po.BorrowRecord">
+        update borrowrecord set recordStatus=#{recordStatus} where brId=#{brId};
+    </update>
+
+</mapper>

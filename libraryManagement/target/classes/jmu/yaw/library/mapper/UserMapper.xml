@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jmu.yaw.library.mapper.UserMapper">
+
+
+
+    <select id="queryUserByUIdAndPassword" parameterType="jmu.yaw.library.po.User" resultType="jmu.yaw.library.po.User">
+        select uId,rId,password,uName,sex,mail from user where uId=#{uId} and password=#{password};
+
+    </select>
+    <resultMap id="UserAndRoleMap" type="jmu.yaw.library.po.User">
+        <!-- id:声明主键，表示user_id是关联查询对象的唯一标识-->
+        <id property="uId" column="uId" />
+        <result property="rId" column="rId" />
+        <result property="password" column="password" />
+        <result property="uName" column="uName" />
+        <result property="sex" column="sex" />
+        <result property="mail" column="mail" />
+        <association property="role" javaType="jmu.yaw.library.po.Role">
+            <id property="rId" column="rId" />
+            <result property="rContent" column="rContent" />
+        </association>
+    </resultMap>
+    <select id="queryUserAndRole" parameterType="jmu.yaw.library.po.User" resultMap="UserAndRoleMap">
+        select uId,user.rId,password,uName,sex,mail,rContent from user,role where uId=#{uId} and role.rId=user.rId;
+    </select>
+</mapper>
